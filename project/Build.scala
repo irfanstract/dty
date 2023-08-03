@@ -584,29 +584,29 @@ object Build {
       // Add git-hash used to package the distribution to the manifest to know it in runtime and report it in REPL
       packageOptions += ManifestAttributes(("Git-Hash", VersionUtil.gitHash)),
 
-      javaOptions ++= {
-        val managedSrcDir = {
-          // Populate the directory
-          (Compile / managedSources).value
+      // javaOptions ++= {
+      //   val managedSrcDir = {
+      //     // Populate the directory
+      //     (Compile / managedSources).value
 
-          (Compile / sourceManaged).value
-        }
-        val externalDeps = externalCompilerClasspathTask.value
-        val jars = packageAll.value
+      //     (Compile / sourceManaged).value
+      //   }
+      //   val externalDeps = externalCompilerClasspathTask.value
+      //   val jars = packageAll.value
 
-        Seq(
-          "-Ddotty.tests.dottyCompilerManagedSources=" + managedSrcDir,
-          "-Ddotty.tests.classes.dottyInterfaces=" + jars("scala3-interfaces"),
-          "-Ddotty.tests.classes.dottyLibrary=" + jars("scala3-library"),
-          "-Ddotty.tests.classes.dottyCompiler=" + jars("scala3-compiler"),
-          "-Ddotty.tests.classes.tastyCore=" + jars("tasty-core"),
-          "-Ddotty.tests.classes.compilerInterface=" + findArtifactPath(externalDeps, "compiler-interface"),
-          "-Ddotty.tests.classes.scalaLibrary=" + findArtifactPath(externalDeps, "scala-library"),
-          "-Ddotty.tests.classes.scalaAsm=" + findArtifactPath(externalDeps, "scala-asm"),
-          "-Ddotty.tests.classes.jlineTerminal=" + findArtifactPath(externalDeps, "jline-terminal"),
-          "-Ddotty.tests.classes.jlineReader=" + findArtifactPath(externalDeps, "jline-reader"),
-        )
-      },
+      //   Seq(
+      //     "-Ddotty.tests.dottyCompilerManagedSources=" + managedSrcDir,
+      //     "-Ddotty.tests.classes.dottyInterfaces=" + jars("scala3-interfaces"),
+      //     "-Ddotty.tests.classes.dottyLibrary=" + jars("scala3-library"),
+      //     "-Ddotty.tests.classes.dottyCompiler=" + jars("scala3-compiler"),
+      //     "-Ddotty.tests.classes.tastyCore=" + jars("tasty-core"),
+      //     "-Ddotty.tests.classes.compilerInterface=" + findArtifactPath(externalDeps, "compiler-interface"),
+      //     "-Ddotty.tests.classes.scalaLibrary=" + findArtifactPath(externalDeps, "scala-library"),
+      //     "-Ddotty.tests.classes.scalaAsm=" + findArtifactPath(externalDeps, "scala-asm"),
+      //     "-Ddotty.tests.classes.jlineTerminal=" + findArtifactPath(externalDeps, "jline-terminal"),
+      //     "-Ddotty.tests.classes.jlineReader=" + findArtifactPath(externalDeps, "jline-reader"),
+      //   )
+      // },
 
       javaOptions ++= Seq(
         s"-Ddotty.tools.dotc.semanticdb.test=${(ThisBuild / baseDirectory).value/"tests"/"semanticdb"}",
@@ -648,77 +648,77 @@ object Build {
 
       Compile / mainClass := Some("dotty.tools.dotc.Main"),
 
-      scala := {
-        val args: List[String] = spaceDelimited("<arg>").parsed.toList
-        val externalDeps = externalCompilerClasspathTask.value
-        val jars = packageAll.value
+      // scala := {
+      //   val args: List[String] = spaceDelimited("<arg>").parsed.toList
+      //   val externalDeps = externalCompilerClasspathTask.value
+      //   val jars = packageAll.value
 
-        val scalaLib = findArtifactPath(externalDeps, "scala-library")
-        val dottyLib = jars("scala3-library")
+      //   val scalaLib = findArtifactPath(externalDeps, "scala-library")
+      //   val dottyLib = jars("scala3-library")
 
-        def run(args: List[String]): Unit = {
-          val fullArgs = insertClasspathInArgs(args, List(".", dottyLib, scalaLib).mkString(File.pathSeparator))
-          runProcess("java" :: fullArgs, wait = true)
-        }
+      //   def run(args: List[String]): Unit = {
+      //     val fullArgs = insertClasspathInArgs(args, List(".", dottyLib, scalaLib).mkString(File.pathSeparator))
+      //     runProcess("java" :: fullArgs, wait = true)
+      //   }
 
-        if (args.isEmpty) {
-          println("Couldn't run `scala` without args. Use `repl` to run the repl or add args to run the dotty application")
-        } else if (scalaLib == "") {
-          println("Couldn't find scala-library on classpath, please run using script in bin dir instead")
-        } else if (args.contains("-with-compiler")) {
-          val args1 = args.filter(_ != "-with-compiler")
-          val asm = findArtifactPath(externalDeps, "scala-asm")
-          val dottyCompiler = jars("scala3-compiler")
-          val dottyStaging = jars("scala3-staging")
-          val dottyTastyInspector = jars("scala3-tasty-inspector")
-          val dottyInterfaces = jars("scala3-interfaces")
-          val tastyCore = jars("tasty-core")
-          run(insertClasspathInArgs(args1, List(dottyCompiler, dottyInterfaces, asm, dottyStaging, dottyTastyInspector, tastyCore).mkString(File.pathSeparator)))
-        } else run(args)
-      },
+      //   if (args.isEmpty) {
+      //     println("Couldn't run `scala` without args. Use `repl` to run the repl or add args to run the dotty application")
+      //   } else if (scalaLib == "") {
+      //     println("Couldn't find scala-library on classpath, please run using script in bin dir instead")
+      //   } else if (args.contains("-with-compiler")) {
+      //     val args1 = args.filter(_ != "-with-compiler")
+      //     val asm = findArtifactPath(externalDeps, "scala-asm")
+      //     val dottyCompiler = jars("scala3-compiler")
+      //     val dottyStaging = jars("scala3-staging")
+      //     val dottyTastyInspector = jars("scala3-tasty-inspector")
+      //     val dottyInterfaces = jars("scala3-interfaces")
+      //     val tastyCore = jars("tasty-core")
+      //     run(insertClasspathInArgs(args1, List(dottyCompiler, dottyInterfaces, asm, dottyStaging, dottyTastyInspector, tastyCore).mkString(File.pathSeparator)))
+      //   } else run(args)
+      // },
 
-      run := scalac.evaluated,
-      scalac := Def.inputTaskDyn {
-        val log = streams.value.log
-        val externalDeps = externalCompilerClasspathTask.value
-        val jars = packageAll.value
-        val scalaLib = findArtifactPath(externalDeps, "scala-library")
-        val dottyLib = jars("scala3-library")
-        val dottyCompiler = jars("scala3-compiler")
-        val args0: List[String] = spaceDelimited("<arg>").parsed.toList
-        val decompile = args0.contains("-decompile")
-        val printTasty = args0.contains("-print-tasty")
-        val debugFromTasty = args0.contains("-Ythrough-tasty")
-        val args = args0.filter(arg => arg != "-repl" && arg != "-decompile" &&
-            arg != "-with-compiler" && arg != "-Ythrough-tasty" && arg != "-print-tasty")
+      // run := scalac.evaluated,
+      // scalac := Def.inputTaskDyn {
+      //   val log = streams.value.log
+      //   val externalDeps = externalCompilerClasspathTask.value
+      //   val jars = packageAll.value
+      //   val scalaLib = findArtifactPath(externalDeps, "scala-library")
+      //   val dottyLib = jars("scala3-library")
+      //   val dottyCompiler = jars("scala3-compiler")
+      //   val args0: List[String] = spaceDelimited("<arg>").parsed.toList
+      //   val decompile = args0.contains("-decompile")
+      //   val printTasty = args0.contains("-print-tasty")
+      //   val debugFromTasty = args0.contains("-Ythrough-tasty")
+      //   val args = args0.filter(arg => arg != "-repl" && arg != "-decompile" &&
+      //       arg != "-with-compiler" && arg != "-Ythrough-tasty" && arg != "-print-tasty")
 
-        val main =
-          if (decompile) "dotty.tools.dotc.decompiler.Main"
-          else if (printTasty) "dotty.tools.dotc.core.tasty.TastyPrinter"
-          else if (debugFromTasty) "dotty.tools.dotc.fromtasty.Debug"
-          else "dotty.tools.dotc.Main"
+      //   val main =
+      //     if (decompile) "dotty.tools.dotc.decompiler.Main"
+      //     else if (printTasty) "dotty.tools.dotc.core.tasty.TastyPrinter"
+      //     else if (debugFromTasty) "dotty.tools.dotc.fromtasty.Debug"
+      //     else "dotty.tools.dotc.Main"
 
-        var extraClasspath = Seq(scalaLib, dottyLib)
+      //   var extraClasspath = Seq(scalaLib, dottyLib)
 
-        if (decompile && !args.contains("-classpath"))
-          extraClasspath ++= Seq(".")
+      //   if (decompile && !args.contains("-classpath"))
+      //     extraClasspath ++= Seq(".")
 
-        if (args0.contains("-with-compiler")) {
-          if (scalaVersion.value == referenceVersion) {
-            log.error("-with-compiler should only be used with a bootstrapped compiler")
-          }
-          val dottyInterfaces = jars("scala3-interfaces")
-          val dottyStaging = jars("scala3-staging")
-          val dottyTastyInspector = jars("scala3-tasty-inspector")
-          val tastyCore = jars("tasty-core")
-          val asm = findArtifactPath(externalDeps, "scala-asm")
-          extraClasspath ++= Seq(dottyCompiler, dottyInterfaces, asm, dottyStaging, dottyTastyInspector, tastyCore)
-        }
+      //   if (args0.contains("-with-compiler")) {
+      //     if (scalaVersion.value == referenceVersion) {
+      //       log.error("-with-compiler should only be used with a bootstrapped compiler")
+      //     }
+      //     val dottyInterfaces = jars("scala3-interfaces")
+      //     val dottyStaging = jars("scala3-staging")
+      //     val dottyTastyInspector = jars("scala3-tasty-inspector")
+      //     val tastyCore = jars("tasty-core")
+      //     val asm = findArtifactPath(externalDeps, "scala-asm")
+      //     extraClasspath ++= Seq(dottyCompiler, dottyInterfaces, asm, dottyStaging, dottyTastyInspector, tastyCore)
+      //   }
 
-        val fullArgs = main :: (if (printTasty) args else insertClasspathInArgs(args, extraClasspath.mkString(File.pathSeparator)))
+      //   val fullArgs = main :: (if (printTasty) args else insertClasspathInArgs(args, extraClasspath.mkString(File.pathSeparator)))
 
-        (Compile / runMain).toTask(fullArgs.mkString(" ", " ", ""))
-      }.evaluated,
+      //   (Compile / runMain).toTask(fullArgs.mkString(" ", " ", ""))
+      // }.evaluated,
 
       /* Add the sources of scalajs-ir.
        * To guarantee that dotty can bootstrap without depending on a version
