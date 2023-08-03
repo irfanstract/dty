@@ -35,5 +35,7 @@
 
 // val `sbt-test` = Build.`sbt-test`
 
+ThisBuild / scalaVersion := "3.3.0"
+
 inThisBuild(Build.thisBuildSettings)
 inScope(Global)(Build.globalSettings)
