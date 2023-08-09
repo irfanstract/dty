@@ -46,8 +46,8 @@ package object tools {
       e.setStackTrace(Array())
       throw e
 
-  // Ensure this object is already classloaded, since it's only actually used
-  // when handling stack overflows and every operation (including class loading)
-  // risks failing.
-  dotty.tools.dotc.core.handleRecursive
+  // // Ensure this object is already classloaded, since it's only actually used
+  // // when handling stack overflows and every operation (including class loading)
+  // // risks failing.
+  // dotty.tools.dotc.core.handleRecursive
  }
