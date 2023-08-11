@@ -25,7 +25,7 @@ class PlainDirectory(givenPath: Directory) extends PlainFile(givenPath) {
 class PlainFile(val givenPath: Path) extends AbstractFile {
   assert(path ne null)
 
-  dotc.util.Stats.record("new PlainFile")
+  // dotc.util.Stats.record("new PlainFile")
 
   def jpath: JPath = givenPath.jpath
 
