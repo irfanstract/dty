@@ -499,6 +499,26 @@ object Build {
       mimaBinaryIssueFilters ++= MiMaFilters.Interfaces
     )
 
+  lazy val `dcStatisticalProject`
+  = {
+    project.in(file("dc-statistics") )
+    .asDottyCompilerSubmodule(NonBootstrapped)
+  }
+
+  lazy val `dcIoLibraryProject`
+  = {
+    project.in(file("dc-io") )
+    .asDottyCompilerSubmodule(NonBootstrapped)
+    .dependsOn(dcStatisticalProject )
+  }
+
+  lazy val `dcDataStructureLibraryProject`
+  = {
+    project.in(file("dc-collections") )
+    .asDottyCompilerSubmodule(NonBootstrapped)
+    .dependsOn(dcStatisticalProject )
+  }
+
   /** Find an artifact with the given `name` in `classpath` */
   def findArtifact(classpath: Def.Classpath, name: String): File = classpath
     .find(_.get(artifact.key).exists(_.name == name))
@@ -1912,9 +1932,16 @@ object Build {
         publish / skip := true
       )
 
-    def asDottyCompilerPredefs(implicit mode: Mode): Project = project.withCommonSettings.
+    def asDottyCompilerSubmodule(implicit mode: Mode): Project = project.withCommonSettings.
       dependsOn(dottyLibrary).
       settings(dottyCompilerPredefSettings)
+
+    def asDottyCompilerPredefs(implicit mode: Mode): Project =
+      project
+      .asDottyCompilerSubmodule
+      .dependsOn(dcStatisticalProject )
+      .dependsOn(dcIoLibraryProject )
+      .dependsOn(dcDataStructureLibraryProject )
 
     def asDottyCompiler(implicit mode: Mode): Project = project.withCommonSettings.
       dependsOn(`scala3-interfaces`).

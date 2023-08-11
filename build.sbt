@@ -36,6 +36,10 @@ val `tasty-core` = Build.`tasty-core`
 
 // val `sbt-test` = Build.`sbt-test`
 
+val dcStatisticalProject = Build.dcStatisticalProject
+val dcIoLibraryProject = Build.dcIoLibraryProject
+val dcDataStructureLibraryProject = Build.dcDataStructureLibraryProject
+
 ThisBuild / scalaVersion := "3.3.0"
 
 inThisBuild(Build.thisBuildSettings)
