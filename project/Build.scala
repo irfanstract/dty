@@ -527,10 +527,46 @@ object Build {
     recur(lines, false)
   }
 
+  lazy val commonDottyCompilerSubmoduleBuildSettings
+  : SettingsDefinition
+  = {
+    Seq(
+      //
+      
+      /**
+       * 
+       * Note:
+       * bench/profiles/projects.yml should be updated accordingly.
+       * 
+       */
+      Compile / scalacOptions ++= Seq("-Yexplicit-nulls", "-Ysafe-init"),
+
+      // get libraries onboard
+      libraryDependencies ++= Seq(
+        "org.scala-lang.modules" % "scala-asm" % "9.5.0-scala-1", // used by the backend
+        Dependencies.oldCompilerInterface, // we stick to the old version to avoid deprecation warnings
+        "org.jline" % "jline-reader" % "3.19.0",   // used by the REPL
+        "org.jline" % "jline-terminal" % "3.19.0",
+        "org.jline" % "jline-terminal-jna" % "3.19.0", // needed for Windows
+        ("io.get-coursier" %% "coursier" % "2.0.16" % Test).cross(CrossVersion.for3Use2_13),
+      ),
+
+      // For convenience, change the baseDirectory when running the compiler
+      Compile / forkOptions := (Compile / forkOptions).value.withWorkingDirectory((ThisBuild / baseDirectory).value),
+      Compile / run / forkOptions := (Compile / run / forkOptions).value.withWorkingDirectory((ThisBuild / baseDirectory).value),
+      // And when running the tests
+      Test / forkOptions := (Test / forkOptions).value.withWorkingDirectory((ThisBuild / baseDirectory).value),
+
+    )
+  }
+
   // Settings shared between scala3-compiler and scala3-compiler-bootstrapped
-  lazy val commonDottyCompilerSettings = Seq(
-       // Note: bench/profiles/projects.yml should be updated accordingly.
-       Compile / scalacOptions ++= Seq("-Yexplicit-nulls", "-Ysafe-init"),
+  lazy val commonDottyCompilerSettings = (
+    Seq()
+    ++ commonDottyCompilerSubmoduleBuildSettings
+
+  ) ++ Seq(
+      /* the scalac options have been externalised as `commonDottyCompilerSubmoduleBuildSettings` */
 
       // Generate compiler.properties, used by sbt
       (Compile / resourceGenerators) += Def.task {
@@ -553,21 +589,9 @@ object Build {
         Seq(file)
       }.taskValue,
 
-      // get libraries onboard
-      libraryDependencies ++= Seq(
-        "org.scala-lang.modules" % "scala-asm" % "9.5.0-scala-1", // used by the backend
-        Dependencies.oldCompilerInterface, // we stick to the old version to avoid deprecation warnings
-        "org.jline" % "jline-reader" % "3.19.0",   // used by the REPL
-        "org.jline" % "jline-terminal" % "3.19.0",
-        "org.jline" % "jline-terminal-jna" % "3.19.0", // needed for Windows
-        ("io.get-coursier" %% "coursier" % "2.0.16" % Test).cross(CrossVersion.for3Use2_13),
-      ),
+      /* the extrenal library listing have been externalised as `commonDottyCompilerSubmoduleBuildSettings` */
 
-      // For convenience, change the baseDirectory when running the compiler
-      Compile / forkOptions := (Compile / forkOptions).value.withWorkingDirectory((ThisBuild / baseDirectory).value),
-      Compile / run / forkOptions := (Compile / run / forkOptions).value.withWorkingDirectory((ThisBuild / baseDirectory).value),
-      // And when running the tests
-      Test / forkOptions := (Test / forkOptions).value.withWorkingDirectory((ThisBuild / baseDirectory).value),
+      /* the base-dir settings have been externalised as `commonDottyCompilerSubmoduleBuildSettings` */
 
       Test / test := {
         // Exclude VulpixMetaTests
@@ -760,6 +784,15 @@ object Build {
       }.taskValue,
   )
 
+  lazy val commonDottyCompilerPredefSettings
+  : SettingsDefinition
+  = (
+    Seq()
+
+    ++ commonDottyCompilerSubmoduleBuildSettings
+    
+  )
+
   def insertClasspathInArgs(args: List[String], cp: String): List[String] = {
     val (beforeCp, fromCp) = args.span(_ != "-classpath")
     val classpath = fromCp.drop(1).headOption.fold(cp)(_ + File.pathSeparator + cp)
@@ -817,7 +850,13 @@ object Build {
   def dottyCompilerSettings(implicit mode: Mode): sbt.Def.SettingsDefinition =
     if (mode == NonBootstrapped) nonBootstrapedDottyCompilerSettings else bootstrapedDottyCompilerSettings
 
+  def dottyCompilerPredefSettings(implicit mode: Mode): sbt.Def.SettingsDefinition =
+    commonDottyCompilerPredefSettings
+
   lazy val `scala3-compiler` = project.in(file("compiler")).asDottyCompiler(NonBootstrapped)
+
+  lazy val `scala3-compiler-predef`
+  = project.in(file("compiler-predef")).asDottyCompilerPredefs(NonBootstrapped)
 
   lazy val Scala3CompilerCoursierTest = config("scala3CompilerCoursierTest") extend Test
   lazy val `scala3-compiler-bootstrapped` = project.in(file("compiler")).asDottyCompiler(Bootstrapped)
@@ -1873,10 +1912,15 @@ object Build {
         publish / skip := true
       )
 
+    def asDottyCompilerPredefs(implicit mode: Mode): Project = project.withCommonSettings.
+      dependsOn(dottyLibrary).
+      settings(dottyCompilerPredefSettings)
+
     def asDottyCompiler(implicit mode: Mode): Project = project.withCommonSettings.
       dependsOn(`scala3-interfaces`).
       dependsOn(dottyLibrary).
       dependsOn(tastyCore).
+      dependsOn(`scala3-compiler-predef`).
       settings(dottyCompilerSettings)
 
     def asDottyLibrary(implicit mode: Mode): Project = {
