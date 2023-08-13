@@ -1889,7 +1889,7 @@ object Build {
         name = "Martin Duhem",
         email = "martin.duhem@gmail.com",
         url = url("https://github.com/Duhemm")
-      )
+      ),
     )
   )
 
