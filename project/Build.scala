@@ -878,6 +878,38 @@ object Build {
   lazy val `scala3-compiler-predef`
   = project.in(file("compiler-predef")).asDottyCompilerPredefs(NonBootstrapped)
 
+  /** 
+   * everything top-level within the package `dotc.core`
+   */
+  lazy val `scala3-compiler-core`
+  = {
+    project.in(file("compiler-core") )
+    .asDottyCompilerSubmodule(NonBootstrapped)
+    .dependsOn(`scala3-compiler-predef`)
+  }
+
+  /** 
+   * everything top-level within the package `dotc.phases`
+   */
+  lazy val `scala3-compiler-phases`
+  = {
+    project.in(file("compiler-phases") )
+    .asDottyCompilerSubmodule(NonBootstrapped)
+    .dependsOn(`scala3-compiler-predef`)
+    .dependsOn(`scala3-compiler-core`)
+  }
+
+  /** 
+   * the REPL package
+   */
+  lazy val `scala3-compiler-interactivemode`
+  = {
+    project.in(file("compiler-interactivemode") )
+    .asDottyCompilerSubmodule(NonBootstrapped)
+    .dependsOn(`scala3-compiler-predef`)
+    .dependsOn(`scala3-compiler-core`)
+  }
+
   lazy val Scala3CompilerCoursierTest = config("scala3CompilerCoursierTest") extend Test
   lazy val `scala3-compiler-bootstrapped` = project.in(file("compiler")).asDottyCompiler(Bootstrapped)
     .configs(Scala3CompilerCoursierTest)
@@ -1890,6 +1922,12 @@ object Build {
         email = "martin.duhem@gmail.com",
         url = url("https://github.com/Duhemm")
       ),
+      Developer(
+        id = "irfanstract",
+        name = "irfanstract",
+        email = "no public e-mail",
+        url = url("https://github.com/irfanstract")
+      ),
     )
   )
 
@@ -1948,6 +1986,9 @@ object Build {
       dependsOn(dottyLibrary).
       dependsOn(tastyCore).
       dependsOn(`scala3-compiler-predef`).
+      dependsOn(`scala3-compiler-core`).
+      dependsOn(`scala3-compiler-phases`).
+      dependsOn(`scala3-compiler-interactivemode`).
       settings(dottyCompilerSettings)
 
     def asDottyLibrary(implicit mode: Mode): Project = {
